@@ -122,6 +122,12 @@ const INSTALL: &[Rule] = &[
 
 const RENDER: &[Rule] = &[
     Rule {
+        needles: &["remotion-ffmpeg-binaries"],
+        cause: "This older Remotion version downloads FFmpeg from a server that no longer provides it.",
+        certain: true,
+        suggestion: "Install FFmpeg and make it available on PATH, or upgrade the source project to Remotion 4 (which bundles FFmpeg).",
+    },
+    Rule {
         needles: &["Could not find composition", "No composition with the ID", "composition with the id"],
         cause: "The composition ID does not exist in this project.",
         certain: true,

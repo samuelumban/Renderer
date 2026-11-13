@@ -103,7 +103,8 @@ URS_E2E_ZIPS=/path/a.zip,/path/b.zip cargo test -p urs-core --test e2e_network -
 ```
 
 CI menjalankan uji nyata tersebut di Windows dengan dua proyek fixture
-(Remotion 4.0.290 dan 3.3.102) berdampingan.
+(Remotion 4.0.290 dan 4.0.150) berdampingan. Di Linux, uji yang sama juga
+lulus dengan Remotion 3.3.102.
 
 ## Batasan yang diketahui
 
@@ -114,6 +115,9 @@ CI menjalankan uji nyata tersebut di Windows dengan dua proyek fixture
   `node_modules/.remotion` (dihitung sebagai "Browser cache"). Berbagi satu
   browser lintas versi Remotion tidak aman, jadi tidak dipaksakan; tersedia
   opsi *Browser executable* di Settings.
+- Remotion 3.x mengunduh FFmpeg dari server yang kini sudah tidak melayani
+  (HTTP 403); proyek Remotion 3 butuh FFmpeg terpasang di PATH. Remotion 4
+  membawa FFmpeg sendiri.
 - Lockfile Bun tidak didukung (diperlakukan sebagai "tanpa lockfile", perlu izin).
 - Versi Yarn Berry/pnpm ditebak dari lockfile bila `packageManager` tidak diisi.
 - Font: deteksi + penambahan file ke `public/fonts`. Pemasangan font per-render

@@ -68,11 +68,11 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path "$env:RUNNER_TEMP\zips" | Out-Null
           Compress-Archive -Path src-tauri/core/tests/fixtures/remotion-v4 -DestinationPath "$env:RUNNER_TEMP\zips\remotion-v4.zip"
-          Compress-Archive -Path src-tauri/core/tests/fixtures/remotion-v3 -DestinationPath "$env:RUNNER_TEMP\zips\remotion-v3.zip"
+          Compress-Archive -Path src-tauri/core/tests/fixtures/remotion-v4-old -DestinationPath "$env:RUNNER_TEMP\zips\remotion-v4-old.zip"
       - name: Import, install, preview and render with the managed runtime
         working-directory: src-tauri
         shell: pwsh
         run: |
-          $env:URS_E2E_ZIPS = "$env:RUNNER_TEMP\zips\remotion-v4.zip,$env:RUNNER_TEMP\zips\remotion-v3.zip"
+          $env:URS_E2E_ZIPS = "$env:RUNNER_TEMP\zips\remotion-v4.zip,$env:RUNNER_TEMP\zips\remotion-v4-old.zip"
           $env:URS_E2E_DIR = "$env:RUNNER_TEMP\urs-e2e"
           cargo test -p urs-core --test e2e_network -- --ignored --nocapture
