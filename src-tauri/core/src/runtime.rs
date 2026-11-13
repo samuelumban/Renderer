@@ -247,7 +247,7 @@ pub fn ensure(paths: &Paths, settings: &Settings, version: &str, log: &mut dyn F
             .map(|e| e.path())
             .find(|p| p.is_dir())
             .ok_or_else(|| Diagnostic::new("Unexpected Node.js archive layout."))?;
-        fs::rename(&inner, &rt.dir)?;
+        fsutil::rename_retry(&inner, &rt.dir).map_err(|e| Diagnostic::io("Could not move the Node.js runtime into place", e))?;
         Ok(())
     })();
     cleanup();

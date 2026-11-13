@@ -40,7 +40,8 @@ impl Core {
             }
         }
 
-        let id = uuid::Uuid::new_v4().simple().to_string();
+        // Short ids keep workspace paths well under Windows path limits.
+        let id = uuid::Uuid::new_v4().simple().to_string()[..12].to_string();
         let ws = self.paths.workspace(&id);
         let source = self.paths.source(&id);
         let fail = |e: Diagnostic| {

@@ -289,7 +289,7 @@ impl Core {
         if req.overwrite && output.is_file() {
             fs::remove_file(&output).map_err(|e| Diagnostic::io("Could not replace the existing output file", e))?;
         }
-        fs::rename(&partial, &output).map_err(|e| Diagnostic::io("Could not move the render into place", e))?;
+        fsutil::rename_retry(&partial, &output).map_err(|e| Diagnostic::io("Could not move the render into place", e))?;
         Ok(Rendered { output, bytes })
     }
 

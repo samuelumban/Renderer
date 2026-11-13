@@ -123,6 +123,20 @@ fn remove_tree(path: &Path) -> std::io::Result<()> {
     }
 }
 
+/// Rename with a few retries: on Windows a freshly written tree can be
+/// briefly locked by antivirus or the search indexer.
+pub fn rename_retry(from: &Path, to: &Path) -> std::io::Result<()> {
+    let mut last = None;
+    for attempt in 0..6 {
+        match fs::rename(from, to) {
+            Ok(()) => return Ok(()),
+            Err(e) => last = Some(e),
+        }
+        std::thread::sleep(std::time::Duration::from_millis(200 * (attempt + 1)));
+    }
+    Err(last.unwrap_or_else(|| std::io::Error::other("rename failed")))
+}
+
 /// Delete the children of `dir` (not `dir` itself). Returns bytes freed.
 pub fn clear_dir(allowed_root: &Path, dir: &Path) -> Result<u64> {
     let before = dir_size(dir);
