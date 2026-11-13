@@ -1,0 +1,78 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core-tests:
+    name: Core tests (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: Test core crate
+        working-directory: src-tauri
+        run: cargo test -p urs-core
+
+  windows:
+    name: Windows installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Test core crate on Windows
+        working-directory: src-tauri
+        run: cargo test -p urs-core
+      - name: Build installer
+        run: npm run tauri build
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: universal-remotion-studio-windows
+          path: src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: error
+
+  windows-e2e:
+    name: Real render on Windows (two Remotion versions)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: Zip fixture projects
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "$env:RUNNER_TEMP\zips" | Out-Null
+          Compress-Archive -Path src-tauri/core/tests/fixtures/remotion-v4 -DestinationPath "$env:RUNNER_TEMP\zips\remotion-v4.zip"
+          Compress-Archive -Path src-tauri/core/tests/fixtures/remotion-v3 -DestinationPath "$env:RUNNER_TEMP\zips\remotion-v3.zip"
+      - name: Import, install, preview and render with the managed runtime
+        working-directory: src-tauri
+        shell: pwsh
+        run: |
+          $env:URS_E2E_ZIPS = "$env:RUNNER_TEMP\zips\remotion-v4.zip,$env:RUNNER_TEMP\zips\remotion-v3.zip"
+          $env:URS_E2E_DIR = "$env:RUNNER_TEMP\urs-e2e"
+          cargo test -p urs-core --test e2e_network -- --ignored --nocapture

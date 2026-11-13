@@ -1,0 +1,2 @@
+{"name":"proj-v3","version":"1.0.0","scripts":{"dev":"remotion studio src/index.ts"},
+ "dependencies":{"remotion":"3.3.102","@remotion/cli":"3.3.102","react":"18.2.0","react-dom":"18.2.0"}}
